@@ -2,6 +2,7 @@
 
 var app = require('express')();
 var path = require('path');
+const passport = require('passport')
 const session = require('express-session')
 
 // "Enhancing" middleware (does not send response, server-side effects only)
@@ -29,6 +30,8 @@ app.use(session({
 //   console.log('session', req.session);
 //   next();
 // });
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/api', require('../api/api.router'));
 
@@ -47,5 +50,7 @@ app.use(require('./statics.middleware'));
 app.use(require('../utils/HttpError')(404).middleware());
 
 app.use(require('./error.middleware'));
+
+
 
 module.exports = app;

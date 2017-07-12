@@ -151,7 +151,7 @@ class UserList extends Component {
 
 /* -----------------    CONTAINER     ------------------ */
 
-const mapState = ({ users }) => ({ users });
+const mapState = ({ users, currentUser }) => ({ users , currentUser});
 
 const mapDispatch = { addUser };
 

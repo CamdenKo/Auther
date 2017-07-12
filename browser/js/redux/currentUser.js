@@ -26,3 +26,10 @@ export const setUser = (email, password) => dispatch => {
   .then(res => dispatch(set(res.data)))
   .catch(err => console.error(`Logging in user with email ${email} failed`, err));
 }
+
+export const fetchCurrentUser = () => dispatch => {
+  console.log('fetch current user hit')
+  axios.get('/api/auth/me')
+  .then(res => dispatch(set(res.data)))
+  .catch(() => console.log('no existing session'))
+}

@@ -14,7 +14,7 @@ class UserItem extends React.Component {
   }
 
   render () {
-    const { user } = this.props;
+    const { user, currentUser } = this.props;
     return (
       <div className="list-group-item min-content user-item">
         <div className="media">
@@ -35,8 +35,12 @@ class UserItem extends React.Component {
               <span>{user.phone}</span>
             </h5>
           </NavLink>
+          {
+            console.log(currentUser.isAdmin ? false : true)
+          }
           <div className="media-right media-middle">
             <button
+            disabled = {(currentUser.isAdmin ? 'false' : 'true')}
                 className="btn btn-default"
                 onClick={this.removeUserCallback}>
               <span className="glyphicon glyphicon-remove" />
@@ -56,7 +60,7 @@ class UserItem extends React.Component {
 
 /* -----------------    CONTAINER     ------------------ */
 
-const mapState = ({ stories }) => ({ stories });
+const mapState = ({ stories, currentUser }) => ({ stories, currentUser });
 
 const mapDispatch = { removeUser, removeStory };
 

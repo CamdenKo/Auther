@@ -6,7 +6,10 @@ router.post('/', (req,res,next) => {
   User.findOne({where: req.body})
   .then(user => {
     if(user){
-      req.session.user = user
+      req.login(user,function(err){
+        if(err) return next(err)
+        return res.json(user)
+      })
       res.json(user)
     } else {
       res.sendStatus(401)
