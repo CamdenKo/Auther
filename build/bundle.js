@@ -24164,9 +24164,13 @@
 	
 	var _stories2 = _interopRequireDefault(_stories);
 	
+	var _currentUser = __webpack_require__(300);
+	
+	var _currentUser2 = _interopRequireDefault(_currentUser);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = (0, _redux.combineReducers)({ users: _users2.default, stories: _stories2.default });
+	exports.default = (0, _redux.combineReducers)({ users: _users2.default, stories: _stories2.default, currentUser: _currentUser2.default });
 
 /***/ }),
 /* 221 */
@@ -24183,6 +24187,8 @@
 	var _axios = __webpack_require__(222);
 	
 	var _axios2 = _interopRequireDefault(_axios);
+	
+	var _currentUser = __webpack_require__(300);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -24233,7 +24239,6 @@
 	      return users.map(function (user) {
 	        return action.user.id === user.id ? action.user : user;
 	      });
-	
 	    default:
 	      return users;
 	  }
@@ -24262,7 +24267,8 @@
 	var addUser = exports.addUser = function addUser(user) {
 	  return function (dispatch) {
 	    _axios2.default.post('/api/users', user).then(function (res) {
-	      return dispatch(create(res.data));
+	      dispatch((0, _currentUser.set)(res.data));
+	      dispatch(create(res.data));
 	    }).catch(function (err) {
 	      return console.error('Creating user: ' + user + ' unsuccesful', err);
 	    });
@@ -29391,6 +29397,8 @@
 	
 	var _history2 = _interopRequireDefault(_history);
 	
+	var _currentUser = __webpack_require__(300);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -29531,7 +29539,7 @@
 	var mapDispatch = function mapDispatch(dispatch) {
 	  return {
 	    logout: function logout() {
-	      console.log('You signed out. Sorta.');
+	      dispatch((0, _currentUser.quit)());
 	      _history2.default.push('/');
 	    }
 	  };
@@ -29732,6 +29740,8 @@
 	
 	var _reactRedux = __webpack_require__(184);
 	
+	var _currentUser = __webpack_require__(300);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -29847,8 +29857,10 @@
 	    value: function onLoginSubmit(event) {
 	      var message = this.props.message;
 	
+	      var email = event.target.email.value;
+	      var password = event.target.password.value;
 	      event.preventDefault();
-	      console.log(message + ' isn\'t implemented yet');
+	      this.props.setUser(email, password);
 	    }
 	  }]);
 	
@@ -29860,7 +29872,7 @@
 	var mapState = function mapState() {
 	  return { message: 'Log in' };
 	};
-	var mapDispatch = null;
+	var mapDispatch = { setUser: _currentUser.setUser };
 	
 	exports.default = (0, _reactRedux.connect)(mapState, mapDispatch)(Login);
 
@@ -29881,6 +29893,10 @@
 	var _react2 = _interopRequireDefault(_react);
 	
 	var _reactRedux = __webpack_require__(184);
+	
+	var _users = __webpack_require__(221);
+	
+	var _currentUser = __webpack_require__(300);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -29995,10 +30011,12 @@
 	  }, {
 	    key: 'onSignupSubmit',
 	    value: function onSignupSubmit(event) {
+	      event.preventDefault();
 	      var message = this.props.message;
 	
-	      event.preventDefault();
-	      console.log(message + ' isn\'t implemented yet');
+	      var email = event.target.email.value;
+	      var password = event.target.password.value;
+	      this.props.addUser({ email: email, password: password });
 	    }
 	  }]);
 	
@@ -30010,7 +30028,7 @@
 	var mapState = function mapState() {
 	  return { message: 'Sign up' };
 	};
-	var mapDispatch = null;
+	var mapDispatch = { addUser: _users.addUser, setUser: _currentUser.setUser };
 	
 	exports.default = (0, _reactRedux.connect)(mapState, mapDispatch)(Signup);
 
@@ -48256,6 +48274,62 @@
 	
 	exports.default = ContentEditable;
 	module.exports = exports['default'];
+
+/***/ }),
+/* 300 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.setUser = exports.quit = exports.set = undefined;
+	exports.default = reducer;
+	
+	var _axios = __webpack_require__(222);
+	
+	var _axios2 = _interopRequireDefault(_axios);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/* Action */
+	var SET = 'SET_CURRENT_USER';
+	var QUIT = 'QUIT_CURRENT_USER';
+	
+	/*Action Creator*/
+	var set = exports.set = function set(user) {
+	  return { type: SET, user: user };
+	};
+	var quit = exports.quit = function quit() {
+	  return { type: QUIT };
+	};
+	
+	/*Reducer*/
+	function reducer() {
+	  var currentUser = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	  var action = arguments[1];
+	
+	  switch (action.type) {
+	    case SET:
+	      return action.user;
+	    case QUIT:
+	      return {};
+	    default:
+	      return currentUser;
+	  }
+	}
+	
+	/*Thunk*/
+	var setUser = exports.setUser = function setUser(email, password) {
+	  return function (dispatch) {
+	    _axios2.default.post('/api/login', { email: email, password: password }).then(function (res) {
+	      return dispatch(set(res.data));
+	    }).catch(function (err) {
+	      return console.error('Logging in user with email ' + email + ' failed', err);
+	    });
+	  };
+	};
 
 /***/ })
 /******/ ]);

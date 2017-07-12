@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import { set } from './currentUser'
 /* -----------------    ACTIONS     ------------------ */
 
 const INITIALIZE = 'INITIALIZE_USERS';
@@ -34,7 +34,6 @@ export default function reducer (users = [], action) {
       return users.map(user => (
         action.user.id === user.id ? action.user : user
       ));
-
     default:
       return users;
   }
@@ -57,7 +56,10 @@ export const removeUser = id => dispatch => {
 
 export const addUser = user => dispatch => {
   axios.post('/api/users', user)
-       .then(res => dispatch(create(res.data)))
+       .then(res => {
+         dispatch(set(res.data))
+         dispatch(create(res.data))
+        })
        .catch(err => console.error(`Creating user: ${user} unsuccesful`, err));
 };
 
@@ -66,3 +68,5 @@ export const updateUser = (id, user) => dispatch => {
        .then(res => dispatch(update(res.data)))
        .catch(err => console.error(`Updating user: ${user} unsuccesful`, err));
 };
+
+

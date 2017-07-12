@@ -7,7 +7,7 @@ router.post('/', (req,res,next) => {
   .then(user => {
     if(user){
       req.session.user = user
-      res.sendStatus(200)
+      res.json(user)
     } else {
       res.sendStatus(401)
     }
